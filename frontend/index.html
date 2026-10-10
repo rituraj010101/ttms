@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TTMS Control Room — Smart City Traffic Operations</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>TTMS Control Room</h1>
+          <p class="subtitle">Traffic &amp; Transportation Management System (MySQL Enterprise)</p>
+        </div>
+      </div>
+      <div class="conn-status" id="connStatus">
+        <span class="dot" id="connDot"></span>
+        <span id="connLabel">Connecting to API&hellip;</span>
+      </div>
+    </header>
+
+    <div class="lane-divider" aria-hidden="true"></div>
+
+    <!-- Core Real-Time KPIs -->
+    <section class="kpis" id="kpis">
+      <article class="kpi">
+        <span class="kpi-label">Active incidents</span>
+        <span class="kpi-value" id="kpiIncidents">&mdash;</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Network avg. speed</span>
+        <span class="kpi-value" id="kpiSpeed">&mdash;</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Sensors active</span>
+        <span class="kpi-value" id="kpiSensors">&mdash;</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">Adaptive signals</span>
+        <span class="kpi-value" id="kpiSignals">&mdash;</span>
+      </article>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" data-target="view-dashboard" role="tab" aria-selected="true">
+        <span>🏠 Main Dashboard &amp; Graphs</span>
+        <span class="badge-pill">All-in-One</span>
+      </button>
+    </nav>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 1: MAIN DASHBOARD (MAP + REAL-TIME OPERATIONS + ALL GRAPHS)  -->
+    <!-- ================================================================= -->
+    <div id="view-dashboard" class="view-section">
+      <main class="main-grid">
+        <div class="left-column">
+          <!-- Section 1: Map Panel -->
+          <section class="panel map-panel">
+            <h2>Network map <span class="map-location">Manhattan, New York</span></h2>
+            <div id="map"></div>
+            <p class="map-note">OpenStreetMap view centered on Midtown Manhattan. Road corridors, sensors, incidents, and telemetry are illustrative demo records, not live NYC feeds.</p>
+            <ul class="legend">
+              <li><span class="swatch open"></span>Open</li>
+              <li><span class="swatch restricted"></span>Restricted</li>
+              <li><span class="swatch closed"></span>Closed</li>
+              <li><span class="swatch incident"></span>Incident</li>
+            </ul>
+            <div class="segment-details" id="segmentDetails" aria-live="polite">
+              <p class="details-placeholder">Select a road corridor on the map to inspect telemetry &amp; geometry.</p>
+            </div>
+          </section>
+
+          <!-- GRAPH 1: Speed & Volume Multi-Series Trend Line Chart -->
+          <section class="panel trend-panel" aria-labelledby="trendHeading">
+            <div class="trend-heading">
+              <div>
+                <h2 id="trendHeading">Corridor Speed &amp; Volume Trends</h2>
+                <p id="trendDescription">Average speed by road over the last 12 hours</p>
+              </div>
+              <div class="trend-tools">
+                <label class="sr-only" for="trendMetric">Trend metric</label>
+                <select id="trendMetric" aria-label="Trend metric">
+                  <option value="speed">Average speed (km/h)</option>
+                  <option value="vehicles">Vehicle volume (veh/hr)</option>
+                </select>
+                <label class="sr-only" for="trendRange">Time range</label>
+                <select id="trendRange" aria-label="Time range">
+                  <option value="12">12 hours</option>
+                  <option value="24">24 hours</option>
+                </select>
+                <span class="demo-tag">LIVE GRAPH</span>
+              </div>
+            </div>
+            <div id="trendChart" class="trend-chart" aria-live="polite">
+              <p class="details-placeholder">Rendering speed trend graph&hellip;</p>
+            </div>
+          </section>
+
+          <!-- GRAPH 2: Actionable corridor operations watchlist -->
+          <section class="panel">
+            <div class="graph-card-header">
+              <div>
+                <h3>Operations watchlist</h3>
+                <p>Corridors ranked by road restrictions, speed shortfalls, and active incidents</p>
+              </div>
+              <span class="demo-tag">DEMO PRIORITIES</span>
+            </div>
+            <div id="operationsWatchlist" class="graph-card-body" aria-live="polite">
+              <p class="details-placeholder">Preparing corridor priorities&hellip;</p>
+            </div>
+          </section>
+
+          <!-- GRAPH 3: 24-Hour Vehicular Volume Distribution (Vertical Bar Chart) -->
+          <section class="panel">
+            <div class="graph-card-header">
+              <div>
+                <h3>Hourly Vehicular Traffic Volume (24h)</h3>
+                <p>Aggregated vehicle flow distribution across all monitored corridors</p>
+              </div>
+              <span class="demo-tag">VOLUME COLUMNS</span>
+            </div>
+            <div id="volumeBarChart" class="graph-card-body">
+              <p class="details-placeholder">Rendering volume distribution graph&hellip;</p>
+            </div>
+          </section>
+
+          <section class="panel road-details-panel" aria-labelledby="roadDetailsHeading">
+            <div class="graph-card-header">
+              <div>
+                <h2 id="roadDetailsHeading">Road corridor details</h2>
+                <p>Road class, operating status, capacity, and latest sample traffic readings</p>
+              </div>
+              <span class="demo-tag">NETWORK OVERVIEW</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" aria-describedby="roadDetailsHeading">
+                <thead>
+                  <tr>
+                    <th>Road corridor</th>
+                    <th>Class</th>
+                    <th>Lanes</th>
+                    <th>Status</th>
+                    <th>Speed limit</th>
+                    <th>Latest speed</th>
+                    <th>Vehicles / hr</th>
+                  </tr>
+                </thead>
+                <tbody id="roadDetailsBody">
+                  <tr><td colspan="7" class="empty">Loading road details&hellip;</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column / Sidebar Operations & Side Graphs -->
+        <section class="panel side-panel">
+          <!-- GRAPH 4: Sensor Network Health Donut SVG Chart -->
+          <div class="panel-block">
+            <h2>Sensor network status</h2>
+            <div id="sensorDonutChart" class="graph-card-body" style="min-height:170px;">
+              <p class="details-placeholder">Rendering sensor breakdown&hellip;</p>
+            </div>
+          </div>
+
+          <!-- GRAPH 5: Traffic Violations Revenue Breakdown -->
+          <div class="panel-block">
+            <h2>Traffic enforcement fines</h2>
+            <div id="violationRevenueChart" class="graph-card-body" style="min-height:160px;">
+              <p class="details-placeholder">Rendering fine revenue graph&hellip;</p>
+            </div>
+          </div>
+
+          <!-- Active Incidents -->
+          <div class="panel-block">
+            <h2>Active incidents</h2>
+            <ul class="incident-list" id="incidentList">
+              <li class="empty">Loading&hellip;</li>
+            </ul>
+            <p class="form-note" id="incidentManagementNote" aria-live="polite"></p>
+          </div>
+
+          <!-- Incident History Accordion -->
+          <details class="panel-block history-panel">
+            <summary>Incident history <span class="pill" id="historyCount">0</span></summary>
+            <ul class="history-list" id="historyList">
+              <li class="empty">Loading&hellip;</li>
+            </ul>
+          </details>
+
+          <!-- Signal Status & Mode Control -->
+          <div class="panel-block">
+            <h2>Signal status &amp; control</h2>
+            <ul class="signal-list" id="signalList">
+              <li class="empty">Loading&hellip;</li>
+            </ul>
+          </div>
+
+          <!-- Road Status Control -->
+          <div class="panel-block">
+            <h2>Road status control</h2>
+            <ul class="segment-list" id="segmentList">
+              <li class="empty">Loading&hellip;</li>
+            </ul>
+            <p class="form-note" id="managementNote" aria-live="polite"></p>
+          </div>
+
+          <!-- Incident Reporting Form -->
+          <div class="panel-block">
+            <h2>Report an incident</h2>
+            <form id="incidentForm">
+              <label>
+                Type
+                <select name="incident_type" required>
+                  <option value="accident">Accident</option>
+                  <option value="breakdown">Breakdown</option>
+                  <option value="roadwork">Roadwork</option>
+                  <option value="weather">Weather</option>
+                  <option value="event">Event</option>
+                  <option value="obstruction">Obstruction</option>
+                </select>
+              </label>
+              <label>
+                Segment
+                <select name="segment_id" id="segmentSelect" required></select>
+              </label>
+              <p class="form-note location-note">Click the map to select an exact pin location. Otherwise, the midpoint of the selected road is used.</p>
+              <label>
+                Severity (1&ndash;5)
+                <input type="number" name="severity" min="1" max="5" value="3" required />
+              </label>
+              <label>
+                Description
+                <input type="text" name="description" placeholder="Incident description and notes" />
+              </label>
+              <button type="submit">Submit report</button>
+            </form>
+            <p class="form-note" id="formNote"></p>
+          </div>
+
+          <!-- Recent Activity Audit Log -->
+          <div class="panel-block">
+            <h2>Recent activity (Audit Log)</h2>
+            <ul class="activity-list" id="activityList">
+              <li class="empty">Loading&hellip;</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="js/app.js?v=20261010-4"></script>
+</body>
+</html>
