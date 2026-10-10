@@ -566,7 +566,7 @@ INSERT INTO sensors (segment_id, sensor_type, location, status, installed_on, la
 INSERT INTO incidents (segment_id, incident_type, severity, location, description, status, reported_by, reported_at) VALUES
   (2, 'roadwork', 2, ST_GeomFromText('POINT(-73.985343 40.762110)', 4326, 'axis-order=long-lat'), 'Demo lane closure near Times Square', 'responding', 2, DATE_SUB(NOW(), INTERVAL 3 HOUR)),
   (1, 'breakdown', 2, ST_GeomFromText('POINT(-73.984183 40.759210)', 4326, 'axis-order=long-lat'), 'Stranded commercial vehicle on left shoulder', 'verified', 2, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-  (5, 'speeding', 4, ST_GeomFromText('POINT(-74.002151 40.765810)', 4326, 'axis-order=long-lat'), 'Multi-vehicle collision near expressway ramp', 'reported', 3, DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
+  (5, 'accident', 4, ST_GeomFromText('POINT(-74.002151 40.765810)', 4326, 'axis-order=long-lat'), 'Multi-vehicle collision near expressway ramp', 'reported', 3, DATE_SUB(NOW(), INTERVAL 45 MINUTE)),
   (7, 'weather', 3, ST_GeomFromText('POINT(-73.970853 40.745410)', 4326, 'axis-order=long-lat'), 'Waterlogging on outer airport feeder lane', 'verified', 2, DATE_SUB(NOW(), INTERVAL 5 HOUR)),
   (8, 'obstruction', 1, ST_GeomFromText('POINT(-73.995196 40.763110)', 4326, 'axis-order=long-lat'), 'Fallen tree branch cleared from sidewalk', 'cleared', 2, DATE_SUB(NOW(), INTERVAL 12 HOUR)),
   (3, 'accident', 4, ST_GeomFromText('POINT(-73.981286 40.755610)', 4326, 'axis-order=long-lat'), 'Minor rear-end collision between two sedans', 'cleared', 3, DATE_SUB(NOW(), INTERVAL 1 DAY));
