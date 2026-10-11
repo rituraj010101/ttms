@@ -9,6 +9,9 @@ const connectionConfig = process.env.DATABASE_URL
       user: process.env.MYSQL_USER || 'ttms_user',
       password: process.env.MYSQL_PASSWORD || 'ttms_password',
       database: process.env.MYSQL_DATABASE || 'ttms',
+      ssl: process.env.MYSQL_SSL_CA
+        ? { ca: process.env.MYSQL_SSL_CA, rejectUnauthorized: true }
+        : undefined,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
